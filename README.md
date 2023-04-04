@@ -2,7 +2,7 @@
 
 ## Launch
 
-### Install depencies
+### Install dependencies
 
 ```bash
 npm install
