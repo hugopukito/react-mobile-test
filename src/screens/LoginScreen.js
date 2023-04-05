@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [buttonText, setButtonText] = useState('Login');
+  const [buttonColor, setButtonColor] = useState('#3498DB');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
+    setLoading(true);
+    setButtonColor('#3498DB');
+    setButtonText('Logging in...');
+
     const url = 'https://hugopukito.com/api/signin';
     const data = { email, password };
 
@@ -14,9 +21,24 @@ const LoginScreen = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-      .then(response => response.json())
-      .then(json => console.log('Token:', json.token))
-      .catch(error => console.error('Error:', error));
+      .then(response => {
+        setLoading(false);
+        return response.json();
+      })
+      .then(json => {
+        console.log('Token:', json.token);
+        setButtonColor('#4CAF50');
+        setButtonText('Logged in!');
+      })
+      .catch(() => {
+        setLoading(false);
+        setButtonColor('#FF0000');
+        setButtonText('Invalid credentials');
+        setTimeout(() => {
+          setButtonColor('#3498DB');
+          setButtonText('Login');
+        }, 3000);
+      });
   };
 
   return (
@@ -38,8 +60,8 @@ const LoginScreen = () => {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity style={[styles.button, { backgroundColor: buttonColor }]} onPress={handleLogin}>
+          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>{buttonText}</Text>}
         </TouchableOpacity>
       </View>
     </View>
@@ -50,7 +72,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'start',
+    justifyContent: 'flex-start',
     backgroundColor: '#FFFFFF',
     paddingTop: 50,
   },
@@ -70,7 +92,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#3498DB',
     borderRadius: 4,
     padding: 12,
     alignItems: 'center',
